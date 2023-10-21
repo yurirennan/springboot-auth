@@ -5,6 +5,7 @@ import com.yuri.projects.auth.dto.out.UserDTOResponse;
 import com.yuri.projects.auth.models.User;
 import com.yuri.projects.auth.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +34,13 @@ public class UserService {
     }
 
     public UserDTOResponse getUser(final Long id) {
+
+        final String idUsuarioLogado = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (!id.equals(Long.parseLong(idUsuarioLogado))) {
+            throw new RuntimeException("Usuario não autorizado!");
+        }
+
         final Optional<User> user = this.userRepository.findById(id);
 
         if (user.isEmpty()) {
