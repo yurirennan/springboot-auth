@@ -1,6 +1,7 @@
 package com.yuri.projects.auth.service;
 
 import com.yuri.projects.auth.dto.UserDTO;
+import com.yuri.projects.auth.dto.in.UpdateUserDTO;
 import com.yuri.projects.auth.dto.out.UserDTOResponse;
 import com.yuri.projects.auth.exceptions.UserNotAuthorizedException;
 import com.yuri.projects.auth.exceptions.UserNotFoundException;
@@ -36,12 +37,7 @@ public class UserService {
     }
 
     public UserDTOResponse getUser(final Long id) {
-
-        final String idUsuarioLogado = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        if (!id.equals(Long.parseLong(idUsuarioLogado))) {
-            throw new UserNotAuthorizedException("Usuario não autorizado!");
-        }
+        this.verifyIfUserLoggedHasPermission(id);
 
         final Optional<User> user = this.userRepository.findById(id);
 
@@ -52,6 +48,34 @@ public class UserService {
         final UserDTOResponse userDTOResponse = UserDTOResponse.from(user.get());
 
         return userDTOResponse;
+    }
+
+    public UserDTOResponse updateUser(final UpdateUserDTO userDTO, final Long id) {
+        this.verifyIfUserLoggedHasPermission(id);
+
+        final Optional<User> userOptional = this.userRepository.findById(id);
+
+        if (userOptional.isEmpty()) {
+            throw new UserNotFoundException("Usuario não encontrado!");
+        }
+
+        final User user = userOptional.get();
+        user.setFirstName(userDTO.getFirstName());
+        user.setLastName(userDTO.getLastName());
+
+        final User userSaved = this.userRepository.save(user);
+
+        final UserDTOResponse userDTOResponse = UserDTOResponse.from(userSaved);
+
+        return userDTOResponse;
+    }
+
+    private void verifyIfUserLoggedHasPermission(final Long id) {
+        final String idUsuarioLogado = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (!id.equals(Long.parseLong(idUsuarioLogado))) {
+            throw new UserNotAuthorizedException("Usuario não autorizado!");
+        }
     }
 
 }
