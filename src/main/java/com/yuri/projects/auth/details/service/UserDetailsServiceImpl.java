@@ -1,6 +1,7 @@
 package com.yuri.projects.auth.details.service;
 
 import com.yuri.projects.auth.details.UserDetailsData;
+import com.yuri.projects.auth.exceptions.UserNotFoundException;
 import com.yuri.projects.auth.models.User;
 import com.yuri.projects.auth.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Optional<User> userOptional = this.userRepository.findByUsername(username);
 
         if(userOptional.isEmpty()) {
-            throw new RuntimeException("Usuario not found!");
+            throw new UserNotFoundException("Usuario não encontrado!");
         }
 
         return new UserDetailsData(userOptional.get());

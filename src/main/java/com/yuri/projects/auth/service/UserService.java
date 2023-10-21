@@ -2,6 +2,8 @@ package com.yuri.projects.auth.service;
 
 import com.yuri.projects.auth.dto.UserDTO;
 import com.yuri.projects.auth.dto.out.UserDTOResponse;
+import com.yuri.projects.auth.exceptions.UserNotAuthorizedException;
+import com.yuri.projects.auth.exceptions.UserNotFoundException;
 import com.yuri.projects.auth.models.User;
 import com.yuri.projects.auth.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,13 +40,13 @@ public class UserService {
         final String idUsuarioLogado = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         if (!id.equals(Long.parseLong(idUsuarioLogado))) {
-            throw new RuntimeException("Usuario não autorizado!");
+            throw new UserNotAuthorizedException("Usuario não autorizado!");
         }
 
         final Optional<User> user = this.userRepository.findById(id);
 
         if (user.isEmpty()) {
-            throw new RuntimeException("Usuario não encontrado!");
+            throw new UserNotFoundException("Usuario não encontrado!");
         }
 
         final UserDTOResponse userDTOResponse = UserDTOResponse.from(user.get());
